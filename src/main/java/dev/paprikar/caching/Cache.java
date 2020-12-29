@@ -5,7 +5,7 @@ import dev.paprikar.caching.lru.LruCache;
 
 public class Cache<K, V> implements ICache<K, V> {
 
-    ICache<K, V> cache;
+    final ICache<K, V> cache;
 
     public Cache(int capacity, CacheDeletionStrategy strategy) {
         switch (strategy) {
@@ -15,6 +15,8 @@ public class Cache<K, V> implements ICache<K, V> {
             case LRU:
                 cache = new LruCache<>(capacity);
                 break;
+            default:
+                throw new IllegalArgumentException("The 'strategy' argument has an invalid value");
         }
     }
 
