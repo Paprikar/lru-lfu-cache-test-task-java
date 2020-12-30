@@ -16,7 +16,7 @@ public class Cache<K, V> implements ICache<K, V> {
                 cache = new LruCache<>(capacity);
                 break;
             default:
-                throw new IllegalArgumentException("The 'strategy' argument has an invalid value");
+                throw new IllegalArgumentException("Illegal strategy: " + strategy);
         }
     }
 
@@ -26,5 +26,13 @@ public class Cache<K, V> implements ICache<K, V> {
 
     public V put(K key, V value) {
         return cache.put(key, value);
+    }
+
+    public void clear() {
+        cache.clear();
+    }
+
+    public int size() {
+        return cache.size();
     }
 }
