@@ -58,7 +58,7 @@ class CachingApplicationTests {
         assertNull(cache.get(1));
         assertEquals(4, cache.get(3));
         assertEquals(5, cache.get(4));
+        assertEquals(4, cache.remove(3));
         assertEquals(5, cache.remove(4));
-
     }
 }

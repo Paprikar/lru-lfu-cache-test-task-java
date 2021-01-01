@@ -86,7 +86,7 @@ public class LfuCache<K, V> implements ICache<K, V> {
             keys.remove(key);
             if (keys.isEmpty()) {
                 lrus.remove(frequency);
-                if (frequency == minFrequency) {
+                if (frequency == minFrequency && !lrus.isEmpty()) {
                     minFrequency = Collections.min(lrus.keySet());
                 }
             }
