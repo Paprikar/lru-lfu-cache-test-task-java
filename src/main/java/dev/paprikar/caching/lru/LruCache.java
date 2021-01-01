@@ -48,6 +48,11 @@ public class LruCache<K, V> implements ICache<K, V> {
         return oldValue;
     }
 
+    public V remove(K key) {
+        CacheNode<K, V> cacheNode;
+        return (cacheNode = cache.remove(key)) == null ? null : cacheNode.value;
+    }
+
     public void clear() {
         cache.clear();
     }

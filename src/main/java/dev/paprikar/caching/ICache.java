@@ -6,6 +6,8 @@ public interface ICache<K, V> {
 
     V put(K key, V value);
 
+    V remove(K key);
+
     void clear();
 
     int size();

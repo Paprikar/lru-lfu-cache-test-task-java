@@ -2,10 +2,7 @@ package dev.paprikar.caching.lfu;
 
 import dev.paprikar.caching.ICache;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class LfuCache<K, V> implements ICache<K, V> {
 
@@ -27,11 +24,15 @@ public class LfuCache<K, V> implements ICache<K, V> {
         long frequency = cacheNode.frequency;
         Set<K> keys = lrus.get(frequency);
         keys.remove(cacheNode.key);
-        if (frequency == minFrequency && keys.isEmpty()) {
-            minFrequency++;
+        if (keys.isEmpty()) {
+            lrus.remove(frequency);
+            if (frequency == minFrequency) {
+                minFrequency++;
+            }
         }
-        cacheNode.frequency = ++frequency;
-        addKeyToFrequency(cacheNode.key, frequency);
+        long newFrequency = frequency + 1;
+        cacheNode.frequency = newFrequency;
+        addKeyToFrequency(cacheNode.key, newFrequency);
     }
 
     public LfuCache(int capacity) {
@@ -61,6 +62,9 @@ public class LfuCache<K, V> implements ICache<K, V> {
                 K k = keys.iterator().next();
                 cache.remove(k);
                 keys.remove(k);
+                if (keys.isEmpty()) {
+                    lrus.remove(minFrequency);
+                }
             }
             minFrequency = 0L;
             cacheNode = new CacheNode<>(key, value); // node to add
@@ -72,6 +76,23 @@ public class LfuCache<K, V> implements ICache<K, V> {
             incrementNodeFrequency(cacheNode);
         }
         return oldValue;
+    }
+
+    public V remove(K key) {
+        CacheNode<K, V> cacheNode = cache.remove(key);
+        if (cacheNode != null) {
+            long frequency = cacheNode.frequency;
+            Set<K> keys = lrus.get(frequency);
+            keys.remove(key);
+            if (keys.isEmpty()) {
+                lrus.remove(frequency);
+                if (frequency == minFrequency) {
+                    minFrequency = Collections.min(lrus.keySet());
+                }
+            }
+            return cacheNode.value;
+        }
+        return null;
     }
 
     public void clear() {

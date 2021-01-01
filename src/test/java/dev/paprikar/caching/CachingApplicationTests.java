@@ -42,6 +42,7 @@ class CachingApplicationTests {
         assertNull(cache.get(1));
         assertEquals(4, cache.get(3));
         assertEquals(5, cache.get(4));
+        assertEquals(5, cache.remove(4));
     }
 
     @Test
@@ -50,13 +51,14 @@ class CachingApplicationTests {
         assertNull(cache.put(1, 1));
         assertNull(cache.put(2, 2));
         assertEquals(1, cache.get(1));
-        assertEquals(1, cache.get(1));
         assertNull(cache.put(3, 3));
         assertNull(cache.get(2));
         assertEquals(3, cache.put(3, 4));
         assertNull(cache.put(4, 5));
-        assertEquals(1, cache.get(1));
-        assertNull(cache.get(3));
+        assertNull(cache.get(1));
+        assertEquals(4, cache.get(3));
         assertEquals(5, cache.get(4));
+        assertEquals(5, cache.remove(4));
+
     }
 }

@@ -28,6 +28,10 @@ public class Cache<K, V> implements ICache<K, V> {
         return cache.put(key, value);
     }
 
+    public V remove(K key) {
+        return cache.remove(key);
+    }
+
     public void clear() {
         cache.clear();
     }
