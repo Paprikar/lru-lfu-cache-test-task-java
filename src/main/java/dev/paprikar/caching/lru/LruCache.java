@@ -2,18 +2,29 @@ package dev.paprikar.caching.lru;
 
 import dev.paprikar.caching.ICache;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class LruCache<K, V> implements ICache<K, V> {
 
-    final int capacity;
-    final Map<K, CacheNode<K, V>> cache;
+    /* ---------------------------------------------------------------- */
+    // Fields
 
-    void moveNodeToTail(CacheNode<K, V> cacheNode) {
-        cache.remove(cacheNode.key);
-        cache.put(cacheNode.key, cacheNode);
+    final int capacity;
+    final Map<K, V> cache;
+
+    /* ---------------------------------------------------------------- */
+    // Internal utilities
+
+    void moveKeyToTail(K key) {
+        V value = cache.remove(key);
+        cache.put(key, value);
     }
+
+    /* ---------------------------------------------------------------- */
+    // Public operations
 
     public LruCache(int capacity) {
         if (capacity <= 0) {
@@ -23,41 +34,81 @@ public class LruCache<K, V> implements ICache<K, V> {
         cache = new LinkedHashMap<>();
     }
 
-    public V get(K key) {
-        CacheNode<K, V> cacheNode;
-        if ((cacheNode = cache.get(key)) == null)
+    public int size() {
+        return cache.size();
+    }
+
+    public boolean isEmpty() {
+        return cache.isEmpty();
+    }
+
+    public boolean containsKey(Object key) {
+        return cache.containsKey(key);
+    }
+
+    public boolean containsValue(Object value) {
+        return cache.containsValue(value);
+    }
+
+    public V get(Object key) {
+        V value;
+        if ((value = cache.get(key)) == null) {
             return null;
-        moveNodeToTail(cacheNode);
-        return cacheNode.value;
+        }
+        @SuppressWarnings("unchecked")
+        K k = (K) key;
+        moveKeyToTail(k);
+        return value;
     }
 
     public V put(K key, V value) {
         V oldValue = null;
-        CacheNode<K, V> cacheNode;
-        if ((cacheNode = cache.get(key)) == null) {
-            if (cache.size() >= capacity) { // do eviction
-                cache.remove(cache.keySet().iterator().next());
+        V v;
+        if ((v = cache.get(key)) == null) {
+            if (cache.size() >= capacity) {
+                // do eviction
+                K k = cache.keySet().iterator().next();
+                cache.remove(k);
             }
-            cacheNode = new CacheNode<>(key, value); // node to add
-            cache.put(key, cacheNode);
-        } else { // key is already added
-            oldValue = cacheNode.value;
-            cacheNode.value = value;
-            moveNodeToTail(cacheNode);
+            cache.put(key, value);
+        } else {
+            // key is already added
+            oldValue = v;
+            cache.put(key, value);
+            moveKeyToTail(key);
         }
         return oldValue;
     }
 
-    public V remove(K key) {
-        CacheNode<K, V> cacheNode;
-        return (cacheNode = cache.remove(key)) == null ? null : cacheNode.value;
+    public V remove(Object key) {
+        V value;
+        return (value = cache.remove(key)) == null ? null : value;
+    }
+
+    public void putAll(Map<? extends K, ? extends V> m) {
+        if (m.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
+            K k = e.getKey();
+            V v = e.getValue();
+            put(k, v);
+        }
     }
 
     public void clear() {
         cache.clear();
     }
 
-    public int size() {
-        return cache.size();
+    public Set<K> keySet() {
+        return cache.keySet();
+    }
+
+    public Collection<V> values() {
+        return cache.values();
+    }
+
+    public Set<Entry<K, V>> entrySet() {
+        return cache.entrySet();
     }
 }

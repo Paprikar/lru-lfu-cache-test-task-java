@@ -3,6 +3,10 @@ package dev.paprikar.caching;
 import dev.paprikar.caching.lfu.LfuCache;
 import dev.paprikar.caching.lru.LruCache;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
 public class Cache<K, V> implements ICache<K, V> {
 
     final ICache<K, V> cache;
@@ -20,7 +24,23 @@ public class Cache<K, V> implements ICache<K, V> {
         }
     }
 
-    public V get(K key) {
+    public int size() {
+        return cache.size();
+    }
+
+    public boolean isEmpty() {
+        return cache.isEmpty();
+    }
+
+    public boolean containsKey(Object key) {
+        return cache.containsKey(key);
+    }
+
+    public boolean containsValue(Object value) {
+        return cache.containsValue(value);
+    }
+
+    public V get(Object key) {
         return cache.get(key);
     }
 
@@ -28,15 +48,27 @@ public class Cache<K, V> implements ICache<K, V> {
         return cache.put(key, value);
     }
 
-    public V remove(K key) {
+    public V remove(Object key) {
         return cache.remove(key);
+    }
+
+    public void putAll(Map<? extends K, ? extends V> m) {
+        cache.putAll(m);
     }
 
     public void clear() {
         cache.clear();
     }
 
-    public int size() {
-        return cache.size();
+    public Set<K> keySet() {
+        return cache.keySet();
+    }
+
+    public Collection<V> values() {
+        return cache.values();
+    }
+
+    public Set<Entry<K, V>> entrySet() {
+        return cache.entrySet();
     }
 }

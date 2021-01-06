@@ -1,14 +1,6 @@
 package dev.paprikar.caching;
 
-public interface ICache<K, V> {
+import java.util.Map;
 
-    V get(K key);
-
-    V put(K key, V value);
-
-    V remove(K key);
-
-    void clear();
-
-    int size();
+public interface ICache<K, V> extends Map<K, V> {
 }
