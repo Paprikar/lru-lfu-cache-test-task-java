@@ -1,6 +1,4 @@
-package dev.paprikar.caching.lfu;
-
-import dev.paprikar.caching.ICache;
+package dev.paprikar.caching.cache;
 
 import java.util.*;
 import java.util.function.Consumer;

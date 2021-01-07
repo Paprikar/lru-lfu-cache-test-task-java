@@ -1,6 +1,4 @@
-package dev.paprikar.caching.lru;
-
-import dev.paprikar.caching.ICache;
+package dev.paprikar.caching.cache;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;

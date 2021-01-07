@@ -1,7 +1,4 @@
-package dev.paprikar.caching;
-
-import dev.paprikar.caching.lfu.LfuCache;
-import dev.paprikar.caching.lru.LruCache;
+package dev.paprikar.caching.cache;
 
 import java.util.Collection;
 import java.util.Map;

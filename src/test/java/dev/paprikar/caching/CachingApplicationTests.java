@@ -1,7 +1,7 @@
 package dev.paprikar.caching;
 
-import dev.paprikar.caching.lfu.LfuCache;
-import dev.paprikar.caching.lru.LruCache;
+import dev.paprikar.caching.cache.Cache;
+import dev.paprikar.caching.cache.CacheDeletionStrategy;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
