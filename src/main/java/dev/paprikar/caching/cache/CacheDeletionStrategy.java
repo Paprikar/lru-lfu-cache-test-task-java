@@ -1,4 +1,4 @@
-package dev.paprikar.caching;
+package dev.paprikar.caching.cache;
 
 public enum CacheDeletionStrategy {
     LRU,

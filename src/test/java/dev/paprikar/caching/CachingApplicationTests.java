@@ -1,7 +1,7 @@
 package dev.paprikar.caching;
 
-import dev.paprikar.caching.lfu.LfuCache;
-import dev.paprikar.caching.lru.LruCache;
+import dev.paprikar.caching.cache.Cache;
+import dev.paprikar.caching.cache.CacheDeletionStrategy;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -16,16 +16,16 @@ class CachingApplicationTests {
                 new Cache<>(10, CacheDeletionStrategy.SOME_NEW_STRATEGY)
         );
         assertThrows(IllegalArgumentException.class, () ->
-                new LruCache<>(0)
+                new Cache<>(0, CacheDeletionStrategy.LRU)
         );
         assertThrows(IllegalArgumentException.class, () ->
-                new LruCache<>(-10)
+                new Cache<>(-10, CacheDeletionStrategy.LRU)
         );
         assertThrows(IllegalArgumentException.class, () ->
-                new LfuCache<>(0)
+                new Cache<>(0, CacheDeletionStrategy.LFU)
         );
         assertThrows(IllegalArgumentException.class, () ->
-                new LfuCache<>(-10)
+                new Cache<>(-10, CacheDeletionStrategy.LFU)
         );
     }
 
