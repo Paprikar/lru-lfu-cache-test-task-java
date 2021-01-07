@@ -23,6 +23,81 @@ public class LfuCache<K, V> implements ICache<K, V> {
     /* ---------------------------------------------------------------- */
     // Internal utilities
 
+    static class Node<K, V> implements Map.Entry<K, V> {
+
+        final K key;
+        V value;
+        long frequency;
+        Node<K, V> prev;
+        Node<K, V> next;
+
+        public Node(K key, V value, long frequency) {
+            this.key = key;
+            this.value = value;
+            this.frequency = frequency;
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+
+        public V setValue(V value) {
+            V oldValue = this.value;
+            this.value = value;
+            return oldValue;
+        }
+
+        public void insertPrevious(Node<K, V> node) {
+            node.prev = prev;
+            node.next = this;
+            if (prev != null) {
+                prev.next = node;
+            }
+            prev = node;
+        }
+
+        public void insertNext(Node<K, V> node) {
+            node.next = next;
+            node.prev = this;
+            if (next != null) {
+                next.prev = node;
+            }
+            next = node;
+        }
+
+        public void unlink() {
+            Node<K, V> p = prev;
+            Node<K, V> n = next;
+            if (p != null) {
+                p.next = n;
+                prev = null;
+            }
+            if (n != null) {
+                n.prev = p;
+                next = null;
+            }
+        }
+
+        public final int hashCode() {
+            return Objects.hashCode(key) ^ Objects.hashCode(value);
+        }
+
+        public final boolean equals(Object o) {
+            if (o == this)
+                return true;
+            if (o instanceof Map.Entry) {
+                Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+                return Objects.equals(key, e.getKey()) &&
+                        Objects.equals(value, e.getValue());
+            }
+            return false;
+        }
+    }
+
     boolean isFrequencyHead(Node<K, V> node) {
         return node.prev == null ||
                 node.prev.frequency != node.frequency;
@@ -34,16 +109,16 @@ public class LfuCache<K, V> implements ICache<K, V> {
     }
 
     void incrementNodeFrequency(Node<K, V> node) {
-        long frequency = node.frequency;
+        long oldFrequency = node.frequency;
         long newFrequency = node.frequency + 1L;
         // the previous tail which related to new frequency
         Node<K, V> targetTail = frequencyTails.put(newFrequency, node);
         if (isFrequencyTail(node)) {
             if (isFrequencyHead(node)) {
                 // this was the last node
-                frequencyTails.remove(frequency);
+                frequencyTails.remove(oldFrequency);
             } else {
-                frequencyTails.put(frequency, node.prev);
+                frequencyTails.put(oldFrequency, node.prev);
             }
             if (targetTail != null) {
                 // still need to move the node
@@ -60,8 +135,8 @@ public class LfuCache<K, V> implements ICache<K, V> {
             }
             node.unlink();
             if (targetTail == null) {
-                // insert right after the tail of previous frequency
-                frequencyTails.get(frequency).insertNext(node);
+                // insert right after the tail of old frequency
+                frequencyTails.get(oldFrequency).insertNext(node);
             } else {
                 targetTail.insertNext(node);
             }

@@ -16,14 +16,6 @@ public class LruCache<K, V> implements ICache<K, V> {
     final Map<K, V> cache;
 
     /* ---------------------------------------------------------------- */
-    // Internal utilities
-
-    void moveKeyToTail(K key) {
-        V value = cache.remove(key);
-        cache.put(key, value);
-    }
-
-    /* ---------------------------------------------------------------- */
     // Public operations
 
     public LruCache(int capacity) {
@@ -51,32 +43,32 @@ public class LruCache<K, V> implements ICache<K, V> {
     }
 
     public V get(Object key) {
-        V value;
-        if ((value = cache.get(key)) == null) {
+        V value = cache.remove(key);
+        if (value == null) {
             return null;
         }
         @SuppressWarnings("unchecked")
         K k = (K) key;
-        moveKeyToTail(k);
+        cache.put(k, value);
         return value;
     }
 
     public V put(K key, V value) {
-        V oldValue = null;
+        V oldValue;
         V v;
         if ((v = cache.get(key)) == null) {
+            oldValue = null;
             if (cache.size() >= capacity) {
                 // do eviction
                 K k = cache.keySet().iterator().next();
                 cache.remove(k);
             }
-            cache.put(key, value);
         } else {
             // key is already added
             oldValue = v;
-            cache.put(key, value);
-            moveKeyToTail(key);
+            cache.remove(key);
         }
+        cache.put(key, value);
         return oldValue;
     }
 
