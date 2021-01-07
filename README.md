@@ -1,5 +1,10 @@
 # Кеширование в памяти (LRU, LFU)
 
+![Java](https://img.shields.io/badge/java-1.8-blue)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/Paprikar/lru-lfu-cache-test-task-java.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/lru-lfu-cache-test-task-java/alerts/)
+[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/Paprikar/lru-lfu-cache-test-task-java.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/lru-lfu-cache-test-task-java/context:java)
+[![GitHub License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 Тестовое задание для Java-разработчика
 
 ---
