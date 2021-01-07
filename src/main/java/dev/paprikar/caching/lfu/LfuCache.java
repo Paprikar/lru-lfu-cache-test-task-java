@@ -5,19 +5,86 @@ import dev.paprikar.caching.ICache;
 import java.util.*;
 import java.util.function.Consumer;
 
+
+/**
+ * This implementation uses the following data structures:
+ * <ul>
+ *     <li>a doubly linked list of nodes of type {@link Node}
+ *     that stores information about key, value and frequency.</li>
+ *     <li>a pointer to the head node of the doubly linked list.</li>
+ *     <li>{@code HashMap<KEY, Node>} - to store information
+ *     about the keys and corresponding nodes.</li>
+ *     <li>{@code HashMap<FREQUENCY, Node>} - to store information
+ *     about the most recently used node for each existing frequency.</li>
+ * </ul>
+ *
+ * <p>
+ * Constant tracking of the head node and the most recently used node for each frequency
+ * allows to perform all necessary operations to move nodes between frequency subsequences.
+ * A previously non-existing node will assume a zero frequency when added.
+ * The frequency of a node is incremented when it is read or when the value associated with it is modified.
+ * When the frequency is incremented, the node is removed from the subsequence related to the old frequency,
+ * and is inserted at the end of the subsequence related to the new frequency.
+ * If there is no information about the most recently used node in the next subsequence
+ * the node is inserted at the end of the current subsequence, so that it does not break the sequence's integrity.
+ *
+ * <p>
+ * All this allows to perform add / get / remove operations in a constant {@code O(1)} time.
+ *
+ * @param <K> the type of keys maintained by this cache
+ * @param <V> the type of mapped values
+ * @author paprikar
+ */
 public class LfuCache<K, V> implements ICache<K, V> {
 
     /* ---------------------------------------------------------------- */
     // Fields
 
+    /**
+     * The capacity factor used when none specified in constructor.
+     */
+    static final float DEFAULT_CAPACITY_FACTOR = 1.5f;
+
+    /**
+     * The cache capacity.
+     */
     final int capacity;
+
+    /**
+     * The map for mapping keys and related nodes.
+     */
     final Map<K, Node<K, V>> cache;
+
+    /**
+     * The map for mapping the most recently used nodes for each frequency.
+     */
     final Map<Long, Node<K, V>> frequencyTails;
+
+    /**
+     * The head (eldest) of the doubly linked list.
+     */
     Node<K, V> head;
+
+    /**
+     * The number of times this {@link LfuCache} has been structurally modified.
+     * This field is used to make iterators on Collection-views of the {@link LfuCache} fail-fast.
+     * (See {@link ConcurrentModificationException})
+     */
     int modCount;
 
+    /**
+     * Holds cached {@link KeySet}
+     */
     Set<K> keySet;
+
+    /**
+     * Holds cached {@link Values}
+     */
     Collection<V> values;
+
+    /**
+     * Holds cached {@link EntrySet}
+     */
     Set<Map.Entry<K, V>> entrySet;
 
     /* ---------------------------------------------------------------- */
@@ -396,13 +463,36 @@ public class LfuCache<K, V> implements ICache<K, V> {
     /* ---------------------------------------------------------------- */
     // Public operations
 
-    public LfuCache(int capacity) {
-        if (capacity <= 0) {
+    /**
+     * Constructs a {@link LfuCache} with the specified capacity and capacity factor.
+     * {@code HashMap} like objects will be created like:<pre>
+     * new HashMap<>((int) (capacity * capacityFactor), 1f);</pre>
+     *
+     * @param capacity       the cache capacity.
+     * @param capacityFactor the capacity factor that affects the capacity of {@code HashMap} like objects.
+     * @throws IllegalArgumentException if the capacity or capacity factor is less than one.
+     */
+    public LfuCache(int capacity, float capacityFactor) {
+        if (capacity < 1) {
             throw new IllegalArgumentException("Illegal capacity: " + capacity);
         }
+        if (capacityFactor < 1f) {
+            throw new IllegalArgumentException("Illegal capacity factor: " + capacityFactor);
+        }
         this.capacity = capacity;
-        cache = new HashMap<>();
-        frequencyTails = new HashMap<>();
+        int hashMapCapacity = (int) (capacity * capacityFactor);
+        cache = new HashMap<>(hashMapCapacity, 1f);
+        frequencyTails = new HashMap<>(hashMapCapacity, 1f);
+    }
+
+    /**
+     * Constructs a {@link LfuCache} with the specified capacity and the default capacity factor (1.5).
+     *
+     * @param capacity the cache capacity.
+     * @throws IllegalArgumentException if the capacity is less than one.
+     */
+    public LfuCache(int capacity) {
+        this(capacity, DEFAULT_CAPACITY_FACTOR);
     }
 
     public int size() {
