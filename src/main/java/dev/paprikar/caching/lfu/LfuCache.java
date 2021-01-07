@@ -58,7 +58,7 @@ public class LfuCache<K, V> implements ICache<K, V> {
     /**
      * The map for mapping the most recently used nodes for each frequency.
      */
-    final Map<Long, Node<K, V>> frequencyTails;
+    final Map<Integer, Node<K, V>> frequencyTails;
 
     /**
      * The head (eldest) of the doubly linked list.
@@ -94,11 +94,11 @@ public class LfuCache<K, V> implements ICache<K, V> {
 
         final K key;
         V value;
-        long frequency;
+        int frequency;
         Node<K, V> prev;
         Node<K, V> next;
 
-        public Node(K key, V value, long frequency) {
+        public Node(K key, V value, int frequency) {
             this.key = key;
             this.value = value;
             this.frequency = frequency;
@@ -176,8 +176,8 @@ public class LfuCache<K, V> implements ICache<K, V> {
     }
 
     void incrementNodeFrequency(Node<K, V> node) {
-        long oldFrequency = node.frequency;
-        long newFrequency = node.frequency + 1L;
+        int oldFrequency = node.frequency;
+        int newFrequency = node.frequency + 1;
         // the previous tail which related to new frequency
         Node<K, V> targetTail = frequencyTails.put(newFrequency, node);
         if (isFrequencyTail(node)) {
@@ -541,9 +541,9 @@ public class LfuCache<K, V> implements ICache<K, V> {
                 oldHead.unlink();
                 cache.remove(oldHead.key);
             }
-            Node<K, V> newNode = new Node<>(key, value, 0L);
+            Node<K, V> newNode = new Node<>(key, value, 0);
             cache.put(key, newNode);
-            Node<K, V> targetTail = frequencyTails.put(0L, newNode);
+            Node<K, V> targetTail = frequencyTails.put(0, newNode);
             if (targetTail == null) {
                 if (head != null) {
                     head.insertPrevious(newNode);
